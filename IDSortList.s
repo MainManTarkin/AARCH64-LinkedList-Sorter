@@ -7,15 +7,51 @@
 .equ SNpayload, 12                  //offset to padding
 .equ SNpadding, 16                  //added padding and full struct size
 
+aStoui:
+
+mov     w3, wzr
+mov     w2, wzr
+ldrb    w1, [x0], 1
+sub     w2, w1, 48
+mov     w3, w2
+
+addingLoop:
+ldrb    w1, [x0], 1
+cbz     w1, endLoop
+mul     w3, w3, 10
+sub     w2, w1, 48
+add     w3, w3, w2
+
+b   addingLoop
+endLoop:
+
+mov     w0, w3
+ret
+
+
 main:
 stp     x29, x30, [sp, -16]!        //backup core x29 and x30 registers
-stp     x20,x21 [sp, -16]!          //backup x20 (which will be used as a current linklist pointer) and x21 (which points to the head)   
-stp     
+stp     x20, x21 [sp, -16]!         //backup x20 (which will be used as a current linklist pointer) and x21 (which points to the head)   
+stp     x22, x23 [sp, -16]!         //backup x22 and x23 (which will store argv and its pointer pointer)
+mov     x22, x1
+mov     x21, xzr
+
 argvLoop:
-ldr     x3, [x1,8]!
-cbz     x1, argvLoopEnd
+ldr     x23, [x22,8]!
+cbz     x23, argvLoopEnd
+mov     x0, x23
+ldrb    w1, [x23]
+
+TSTNE   w1, '-'
+bne     addToList
+add     x0, x0, 1
+bl      aStoui
 
 
+b       endIfElse
+addToList:
+
+endIfElse:
 
 b argvLoop
 argvLoopEnd:
