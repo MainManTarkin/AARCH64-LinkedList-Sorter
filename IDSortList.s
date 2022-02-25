@@ -17,7 +17,7 @@ sub     w2, w1, 48                  //convert asci number value to its real valu
 addingLoop:
 ldrb    w1, [x0], 1                 //load next byte increment pointer by one
 cbz     w1, endLoop                 //check to see if end of string was reached (also used to see if there was only one value to begin with)
-mul     w2, w2, w20                  //mulitiple w2(ret register) by ten to make room for next value
+mul     w2, w2, w20                 //mulitiple w2(ret register) by ten to make room for next value
 sub     w1, w1, 48                  //turn asci number to its real number store in x1
 add     w2, w2, w1                  //store that number in itermediate ret register
 
@@ -25,10 +25,10 @@ b   addingLoop                      //repeat untill end of string reached
 endLoop:
 
 mov     w0, w2                      //move itermediate return register to w0 (real return register)
+str     x20, [sp], 16
 ret
 
 InSrtList:
-
 ldr     w6, [x0, SNPayload]         //preload the payload for the node we want to insert
 cbz     x1, emptyhead               //checl to see if the head points to nothing
 
@@ -38,23 +38,23 @@ cmp     w6, w4                      //check to see if x2's payload is greater th
 ble     setNewHead                  //if x0's is smaller then set that as the new head
 
 loopLink:                           //if not then run loopLink else
-ldr     x3, [x2, SNbeginNod]                 //load the node x2 points to into x3
+ldr     x3, [x2, SNbeginNod]        //load the node x2 points to into x3
 cbz     x3, setEndLink              //check to see if x2 even points to anything
 ldr     w4, [x3, SNPayload]         //if so then load x3's payload into w4
 cmp     w4, w6                      //see if x3's payload is less then x0's
 ble     greaterThenNode             
-str     x3, [x0, SNbeginNod]                 //if its greater then set x3 node to what x0 node points to
-str     x0, [x2, SNbeginNod]                 //and set x2 node to point to x0 node
+str     x3, [x0, SNbeginNod]        //if its greater then set x3 node to what x0 node points to
+str     x0, [x2, SNbeginNod]        //and set x2 node to point to x0 node
 b       endHeadIf                   //end function
 greaterThenNode:
 mov     x2, x3                      //if x3 node is less then x0 make x2 become x3 keep incrementing untill you find a node that is greater then x0
 b loopLink
 
 setEndLink:
-str     x0, [x2, SNbeginNod]                 //if end of linkedlist is found set x2 to point to x0 nwhich is now the end of the list
+str     x0, [x2, SNbeginNod]        //if end of linkedlist is found set x2 to point to x0 nwhich is now the end of the list
 b       endHeadIf                   //end function
 setNewHead:
-str     x2, [x0, SNbeginNod]                 //if x0's payload is smaller then what the head points to then make it the new head
+str     x2, [x0, SNbeginNod]        //if x0's payload is smaller then what the head points to then make it the new head
 mov     x1, x0
 
 b endHeadIf
@@ -62,7 +62,6 @@ emptyhead:
 mov     x1, x0                      //if head is empty make x0 the new head
 
 endHeadIf:
-ldr     x20, [sp], 16               //pop off x20 from the stack
 ret
 
 deleteNode:                         //function to delete node from list
@@ -101,14 +100,14 @@ bl      free                        //free the prev node pointed to by the head
 deleteNodeEnd:
 mov     x0, x20                     //set return value to saved head pointer
 
-ldr     x20, [sp], 16              //pop off stored values from the stack
-ldp     x29,x30, [sp], 16          //^
+ldr     x20, [sp], 16               //pop off stored values from the stack
+ldp     x29, x30, [sp], 16           //^
 ret
 
 main:
 stp     x29, x30, [sp, -16]!        //backup core x29 and x30 registers
-stp     x20, x21, [sp, -16]!         //backup x20 (which will be used as a current linklist pointer) and x21 (which points to the head)   
-stp     x22, x23, [sp, -16]!         //backup x22 and x23 (which will store argv and its pointer pointer)
+stp     x20, x21, [sp, -16]!        //backup x20 (which will be used as a current linklist pointer) and x21 (which points to the head)   
+stp     x22, x23, [sp, -16]!        //backup x22 and x23 (which will store argv and its pointer pointer)
 str     x24, [sp, -16]!             //backup x24 (used to store aStoui return val)
 mov     x22, x1                     //backup the argv to register x22 (which is on the stack)
 mov     x21, xzr                    //set the pointer to the linked list head to zero
@@ -149,8 +148,7 @@ ldr     x0, =bad_malloc             //load address to string for malloc fail
 bl      printf
 
 argvLoopEnd:
-
-
+mov     x6, x7
 ldr     x0, =head_address           //load string address for first printf format
 mov     x1, x21                     //get head pointer for printf place it into x1
 bl      printf
@@ -171,10 +169,10 @@ b       printfLoop                  //repeat untill end of linked list
 
 endPrintfLoop:
 mov     x0, xzr                     //set return value
-ldr     x24, [sp], 16              //pop the stack of registers stored
+ldr     x24, [sp], 16               //pop the stack of registers stored
 ldp     x22, x23, [sp], 16          //^
 ldp     x20, x21, [sp], 16          //^
-ldp     x29, x30, [sp], 16         //^
+ldp     x29, x30, [sp], 16          //^
 ret
 
 .data
