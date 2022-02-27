@@ -67,13 +67,13 @@ ret
 deleteNode:                         //function to delete node from list
 stp     x29, x30, [sp, -16]!        //backup frame pointer and link register to the stack
 str     x20, [sp, -16]!             //backup x20 which is the current head pointer
-cbz     x1, deleteNodeEnd           // check to see if x1 is null
 mov     x20, x1                     //make x20's value be x1's value
-
+cbz     x20, deleteNodeEnd          // check to see if x1 is null
 ldr     x3, [x20, SNbeginNod]       //load x20's next node into x3
 ldr     w4, [x20, SNPayload]        //load x20's payload
 cmp     w4, w0                      //test to see if w4 and w0 are equal
 beq     headNode                    //if so then run headNode routine
+mov     x2, x20                     //set prev pointer node to head node
 
 listIterator:                       //else iterate through the list
 cbz     x3, deleteNodeEnd           //see if x3 is null (used to end loop)
@@ -81,7 +81,7 @@ ldr     w4, [x3, SNPayload]         //load x3's payload into w4
 cmp     w4, w0                      //test to see if w4 is equal to w0
 beq     foundMatch                  //if so run foundMatch routine
 mov     x2, x3                      //if not x2 takes on x3's value
-ldr     x3, [x2, SNPayload]         //get x2's next node and put it into x3
+ldr     x3, [x2, SNbeginNod]        //get x2's next node and put it into x3
 b       listIterator                //branch up continue loop
 
 foundMatch:
